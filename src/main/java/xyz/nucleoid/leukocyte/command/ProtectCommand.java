@@ -26,7 +26,6 @@ import xyz.nucleoid.leukocyte.authority.AuthorityMap;
 import xyz.nucleoid.leukocyte.authority.AuthorityShapes;
 import xyz.nucleoid.leukocyte.command.argument.AuthorityArgument;
 import xyz.nucleoid.leukocyte.command.argument.ProtectionRuleArgument;
-import xyz.nucleoid.leukocyte.command.argument.RoleArgument;
 import xyz.nucleoid.leukocyte.command.argument.RuleResultArgument;
 import xyz.nucleoid.leukocyte.rule.ProtectionRule;
 import xyz.nucleoid.leukocyte.rule.ProtectionRuleMap;
@@ -96,10 +95,7 @@ public final class ProtectCommand {
                                 .executes(ProtectCommand::addPlayerExclusion))
                             )
 
-                            .then(literal("role")
-                                .then(RoleArgument.argument("role")
-                                .executes(ProtectCommand::addRoleExclusion))
-                            )
+
                     ))
                     .then(literal("remove")
                         .then(AuthorityArgument.argument("authority")
@@ -108,10 +104,7 @@ public final class ProtectCommand {
                                 .executes(ProtectCommand::removePlayerExclusion))
                             )
 
-                            .then(literal("role")
-                                .then(RoleArgument.argument("role")
-                                .executes(ProtectCommand::removeRoleExclusion))
-                            )
+
                     ))
                 )
                 .then(literal("display")
@@ -249,32 +242,6 @@ public final class ProtectCommand {
         }
 
         context.getSource().sendFeedback(new LiteralText("Removed " + count + " player exclusions from " + authority.getKey()), true);
-
-        return Command.SINGLE_SUCCESS;
-    }
-
-    private static int addRoleExclusion(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-        Authority authority = AuthorityArgument.get(context, "authority");
-        String role = RoleArgument.get(context, "role");
-
-        if (authority.getExclusions().addRole(role)) {
-            context.getSource().sendFeedback(new LiteralText("Added '" + role + "' exclusion to " + authority.getKey()), true);
-        } else {
-            context.getSource().sendError(new LiteralText("'" + role + "' is already excluded"));
-        }
-
-        return Command.SINGLE_SUCCESS;
-    }
-
-    private static int removeRoleExclusion(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-        Authority authority = AuthorityArgument.get(context, "authority");
-        String role = RoleArgument.get(context, "role");
-
-        if (authority.getExclusions().removeRole(role)) {
-            context.getSource().sendFeedback(new LiteralText("Removed '" + role + "' exclusion from " + authority.getKey()), true);
-        } else {
-            context.getSource().sendError(new LiteralText("'" + role + "' is not excluded"));
-        }
 
         return Command.SINGLE_SUCCESS;
     }

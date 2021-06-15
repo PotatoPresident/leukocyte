@@ -3,10 +3,10 @@ package xyz.nucleoid.leukocyte;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import net.fabricmc.fabric.api.util.NbtType;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.registry.RegistryKey;
@@ -32,13 +32,9 @@ public final class Leukocyte extends PersistentState {
 
     private final IndexedAuthorityMap authorities = new IndexedAuthorityMap();
 
-    private Leukocyte() {
-        super(ID);
-    }
-
     public static Leukocyte get(MinecraftServer server) {
         PersistentStateManager state = server.getOverworld().getPersistentStateManager();
-        return state.getOrCreate(Leukocyte::new, ID);
+        return state.getOrCreate(Leukocyte::fromNbt, Leukocyte::new, ID);
     }
 
     public static void registerRuleEnforcer(ProtectionRuleEnforcer enforcer) {
@@ -87,11 +83,11 @@ public final class Leukocyte extends PersistentState {
     }
 
     @Override
-    public CompoundTag toTag(CompoundTag root) {
-        ListTag authorityList = new ListTag();
+    public NbtCompound writeNbt(NbtCompound root) {
+        NbtList authorityList = new NbtList();
 
         for (Authority authority : this.authorities) {
-            DataResult<Tag> result = Authority.CODEC.encodeStart(NbtOps.INSTANCE, authority);
+            DataResult<NbtElement> result = Authority.CODEC.encodeStart(NbtOps.INSTANCE, authority);
             result.result().ifPresent(authorityList::add);
         }
 
@@ -100,18 +96,19 @@ public final class Leukocyte extends PersistentState {
         return root;
     }
 
-    @Override
-    public void fromTag(CompoundTag root) {
-        this.authorities.clear();
+    public static Leukocyte fromNbt(NbtCompound root) {
+        Leukocyte leukocyte = new Leukocyte();
 
-        ListTag authoritiesList = root.getList("authorities", NbtType.COMPOUND);
+        NbtList authoritiesList = root.getList("authorities", NbtType.COMPOUND);
 
-        for (Tag authorityTag : authoritiesList) {
+        for (NbtElement authorityTag : authoritiesList) {
             Authority.CODEC.decode(NbtOps.INSTANCE, authorityTag)
                     .map(Pair::getFirst)
                     .result()
-                    .ifPresent(this::addAuthority);
+                    .ifPresent(leukocyte::addAuthority);
         }
+
+        return leukocyte;
     }
 
     @Override

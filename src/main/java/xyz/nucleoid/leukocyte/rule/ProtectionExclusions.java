@@ -7,7 +7,6 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
-import xyz.nucleoid.leukocyte.roles.RoleAccessor;
 import xyz.nucleoid.stimuli.filter.EventFilter;
 
 import java.util.ArrayList;
@@ -81,6 +80,7 @@ public final class ProtectionExclusions {
             return true;
         }
 
+        /* TODO wait for playerroles to be fixed
         if (player instanceof ServerPlayerEntity) {
             for (String excludeRole : this.roles) {
                 if (RoleAccessor.INSTANCE.hasRole(((ServerPlayerEntity) player), excludeRole)) {
@@ -88,6 +88,7 @@ public final class ProtectionExclusions {
                 }
             }
         }
+         */
 
         return false;
     }
